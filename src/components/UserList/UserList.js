@@ -7,6 +7,7 @@ import FavoriteIcon from "@material-ui/icons/Favorite";
 import { useDispatch, useSelector } from "react-redux";
 import { checkboxes } from "components/CheckBox/checkboxes";
 import { ADD_NATION, REMOVE_NATION } from "redux/actions/nationsActions";
+import { SAVE_FAVORITE_USER, REMOVE_FAVORITE_USER , GET_FROM_LOCAL_STORAGE , CONSTANT_LOCAL_STORAGE_NAME} from "redux/actions/favoritesActions";
 import * as S from "./style";
 
 const UserList = ({ users, isLoading }) => {
@@ -23,20 +24,39 @@ const UserList = ({ users, isLoading }) => {
     setHoveredUserId();
   };
 
-
   const nations = useSelector((state) => {
     return state.nations
   });
 
-  const handleCheckBoxChange = (checkBoxValue, isChecked) => {
+  const favoritesUsers = useSelector((state) => {
+    return state.favoritesUsers
+  })
 
+  const handleCheckBoxChange = (checkBoxValue, isChecked) => {
     dispatch({ type: isChecked ? ADD_NATION : REMOVE_NATION, payload: checkBoxValue })
   }
+
+  useEffect(() => {
+    const favUsersFromLocalStorage = JSON.parse(localStorage.getItem(CONSTANT_LOCAL_STORAGE_NAME)) || favoritesUsers;
+    favUsersFromLocalStorage.forEach( _ => dispatch({ type: GET_FROM_LOCAL_STORAGE, payload: favUsersFromLocalStorage }))
+  }, [users]);
+
+  const handleClickOnUser = (user) => {
+    dispatch({ type: favoritesUsers.includes(user) ? REMOVE_FAVORITE_USER : SAVE_FAVORITE_USER, payload: user })
+  };
 
   return (
     <S.UserList>
       <S.Filters>
-       {checkboxes.map(checkbox => <CheckBox value={checkbox.value} label={checkbox.label} key={checkbox.value} onChange={handleCheckBoxChange} isChecked={nations.includes(checkbox.value)}/>)}
+       {
+        checkboxes.map(checkbox => 
+          <CheckBox 
+          value={checkbox.value}
+          label={checkbox.label}
+          key={checkbox.value}
+          onChange={handleCheckBoxChange}
+          isChecked={nations.includes(checkbox.value)}/>)
+       }
       </S.Filters>
       <S.List>
         {users.map((user, index) => {
@@ -45,6 +65,7 @@ const UserList = ({ users, isLoading }) => {
               key={index}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={handleMouseLeave}
+              onClick={() => {handleClickOnUser(user)}}
             >
               <S.UserPicture src={user?.picture.large} alt="" />
               <S.UserInfo>
@@ -59,7 +80,7 @@ const UserList = ({ users, isLoading }) => {
                   {user?.location.city} {user?.location.country}
                 </Text>
               </S.UserInfo>
-              <S.IconButtonWrapper isVisible={index === hoveredUserId}>
+              <S.IconButtonWrapper isVisible={index === hoveredUserId || favoritesUsers.includes(user)}>
                 <IconButton>
                   <FavoriteIcon color="error" />
                 </IconButton>
