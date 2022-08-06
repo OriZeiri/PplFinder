@@ -6,6 +6,7 @@ import IconButton from "@material-ui/core/IconButton";
 import FavoriteIcon from "@material-ui/icons/Favorite";
 import { useDispatch, useSelector } from "react-redux";
 import { checkboxes } from "components/CheckBox/checkboxes";
+import { ADD_NATION, REMOVE_NATION } from "redux/actions/nationsActions";
 import * as S from "./style";
 
 const UserList = ({ users, isLoading }) => {
@@ -29,7 +30,7 @@ const UserList = ({ users, isLoading }) => {
 
   const handleCheckBoxChange = (checkBoxValue, isChecked) => {
 
-    dispatch({ type: isChecked ? 'ADD_NATION' : 'REMOVE_NATION', payload: checkBoxValue })
+    dispatch({ type: isChecked ? ADD_NATION : REMOVE_NATION, payload: checkBoxValue })
   }
 
   return (
