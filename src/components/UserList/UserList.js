@@ -4,9 +4,14 @@ import Spinner from "components/Spinner";
 import CheckBox from "components/CheckBox";
 import IconButton from "@material-ui/core/IconButton";
 import FavoriteIcon from "@material-ui/icons/Favorite";
+import { useDispatch, useSelector } from "react-redux";
+import { checkboxes } from "components/CheckBox/checkboxes";
 import * as S from "./style";
 
 const UserList = ({ users, isLoading }) => {
+
+  const dispatch = useDispatch();
+
   const [hoveredUserId, setHoveredUserId] = useState();
 
   const handleMouseEnter = (index) => {
@@ -17,13 +22,20 @@ const UserList = ({ users, isLoading }) => {
     setHoveredUserId();
   };
 
+
+  const nations = useSelector((state) => {
+    return state.nations
+  });
+
+  const handleCheckBoxChange = (checkBoxValue, isChecked) => {
+
+    dispatch({ type: isChecked ? 'ADD_NATION' : 'REMOVE_NATION', payload: checkBoxValue })
+  }
+
   return (
     <S.UserList>
       <S.Filters>
-        <CheckBox value="BR" label="Brazil" />
-        <CheckBox value="AU" label="Australia" />
-        <CheckBox value="CA" label="Canada" />
-        <CheckBox value="DE" label="Germany" />
+       {checkboxes.map(checkbox => <CheckBox value={checkbox.value} label={checkbox.label} key={checkbox.value} onChange={handleCheckBoxChange} isChecked={nations.includes(checkbox.value)}/>)}
       </S.Filters>
       <S.List>
         {users.map((user, index) => {
