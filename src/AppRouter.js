@@ -7,11 +7,13 @@ import { ThemeProvider } from "theme";
 import NavBar from "components/NavBar";
 import nationsReducer from "redux/reducers/nationsReducer";
 import favoritesReducers from "redux/reducers/favoritesReducers";
+import pageNumberReducer from "redux/reducers/pageNumberReducer";
 
 const store = configureStore({
   reducer:{
     nations : nationsReducer,
     favoritesUsers : favoritesReducers,
+    pageNum : pageNumberReducer 
   }
 })
 
