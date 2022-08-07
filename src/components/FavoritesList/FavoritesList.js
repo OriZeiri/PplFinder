@@ -7,17 +7,22 @@ import {REMOVE_FAVORITE_USER , CONSTANT_LOCAL_STORAGE_NAME} from "redux/actions/
 import * as S from "./style";
 
 const FavoritesList = () => {
+
+  // get from local storage  
   const [usersToDisplay, setUsersToDisplay] = useState(JSON.parse(localStorage.getItem(CONSTANT_LOCAL_STORAGE_NAME)));
   const dispatch = useDispatch();
 
+  // get from redux-state
   const favoritesUsers = useSelector((state) => {
     return state.favoritesUsers
   });
 
+  // incase there are changes make sure i got the updated users
   useEffect(() => {
     setUsersToDisplay(favoritesUsers);
   }, [usersToDisplay, favoritesUsers]);
 
+  // remove user from favorite page
   const handleUserClick = (user) => {
     dispatch({ type: REMOVE_FAVORITE_USER, payload: user })
   };

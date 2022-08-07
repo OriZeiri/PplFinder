@@ -10,7 +10,7 @@ const CheckBox = ({ isChecked, onChange, label, value }) => {
   return (
     <S.CheckBox>
       <FormControlLabel
-        control={<Checkbox checked={isChecked} onChange={(e) => handleChange(e.currentTarget.checked)} color="primary" />}
+        control={<Checkbox checked={isChecked} onChange={(event) => handleChange(event.currentTarget.checked)} color="primary" />}
         label={label}
       />
     </S.CheckBox>

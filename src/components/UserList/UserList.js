@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Text from "components/Text";
 import Spinner from "components/Spinner";
 import CheckBox from "components/CheckBox";
@@ -8,10 +8,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkboxes } from "components/CheckBox/checkboxes";
 import { ADD_NATION, REMOVE_NATION } from "redux/actions/nationsActions";
 import { SAVE_FAVORITE_USER, REMOVE_FAVORITE_USER , GET_FROM_LOCAL_STORAGE , CONSTANT_LOCAL_STORAGE_NAME} from "redux/actions/favoritesActions";
+import { INCREASE_PAGE_NUM } from "redux/actions/pageNumberActions";
 import * as S from "./style";
 
 const UserList = ({ users, isLoading }) => {
 
+  // * set a dispatch to trigger a change to global state.
   const dispatch = useDispatch();
 
   const [hoveredUserId, setHoveredUserId] = useState();
@@ -24,26 +26,47 @@ const UserList = ({ users, isLoading }) => {
     setHoveredUserId();
   };
 
+  // get current nations & favorites users from redux-state
   const nations = useSelector((state) => {
     return state.nations
   });
-
   const favoritesUsers = useSelector((state) => {
     return state.favoritesUsers
   })
 
+  // Task 1 - Nations checkbox filters
   const handleCheckBoxChange = (checkBoxValue, isChecked) => {
     dispatch({ type: isChecked ? ADD_NATION : REMOVE_NATION, payload: checkBoxValue })
   }
 
+  // Task 2 - Favorite users
+  // fetching favorites from local storage for every change in users state
   useEffect(() => {
-    const favUsersFromLocalStorage = JSON.parse(localStorage.getItem(CONSTANT_LOCAL_STORAGE_NAME)) || favoritesUsers;
-    favUsersFromLocalStorage.forEach( _ => dispatch({ type: GET_FROM_LOCAL_STORAGE, payload: favUsersFromLocalStorage }))
+    const favoritesLocalStorage = JSON.parse(localStorage.getItem(CONSTANT_LOCAL_STORAGE_NAME)) || favoritesUsers;
+    favoritesLocalStorage.forEach( _ => dispatch({ type: GET_FROM_LOCAL_STORAGE, payload: favoritesLocalStorage }))
   }, [users]);
 
   const handleClickOnUser = (user) => {
     dispatch({ type: favoritesUsers.includes(user) ? REMOVE_FAVORITE_USER : SAVE_FAVORITE_USER, payload: user })
   };
+
+  // Task 3 - Infinity Scroll
+  const userRef = useRef();
+  // set logic for last user on list
+  const lastUserRef = useCallback(node => {
+    if (userRef.current) 
+    {
+      // remove last reference
+      userRef.current.disconnect();
+    }
+    userRef.current = new IntersectionObserver(entries => {
+      // incase the last user show up on screen 
+      if (entries[0].isIntersecting) {
+        dispatch({ type: INCREASE_PAGE_NUM });
+      }
+    })
+    if (node) userRef.current.observe(node);
+  }, []);
 
   return (
     <S.UserList>
@@ -62,6 +85,7 @@ const UserList = ({ users, isLoading }) => {
         {users.map((user, index) => {
           return (
             <S.User
+              ref={index + 1 === users.length ? lastUserRef : null}
               key={index}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={handleMouseLeave}
